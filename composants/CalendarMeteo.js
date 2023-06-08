@@ -11,7 +11,7 @@ export default function CalendarMeteo() {
 
     const [selectDay, setSelectDay] = useState(null);
 
-    const [selectHour2, setSelectHour] = useState(null);
+    const [selectHour, setSelectHour] = useState(null);
 
     const [calendarData, setCalendarData] = useState(null);
 
@@ -25,27 +25,24 @@ export default function CalendarMeteo() {
         const data = await response.json();
           setCalendarData(data);
           setCalendarDataSelect(data.list[0]);
+          setSelectHour(((new Date(data.list[7].dt_txt).length) < 2) ? '0'+(new Date(data.list[7].dt_txt).getHours()) : new Date(data.list[7].dt_txt).getHours()+'h')
         // console.log(calendarDataSelect);
-        console.log(data.list);
+        // console.log(data.list);
         } catch (error) {
         console.error(error);
         }
     };
 
     const listeJour = [
-        "Dim",
-        "Lun",
-        "Mar",
-        "Mer", 
-        "Jeu",
-        "Ven",
-        "Sam"
+        "Dimanche",
+        "Lundi",
+        "Mardi",
+        "Mercredi", 
+        "Jeudi",
+        "Vendredi",
+        "Samedi"
     ];
 
-    // let removeJour = (new Date().getDay())-2;
-    //   if(removeJour == -1) removeJour = 6
-    //   if(removeJour == -2) removeJour = 6
-    //   newListeJour = listeJour.splice(removeJour, 2);
 
     const listeHour = [
       "03h",
@@ -58,10 +55,7 @@ export default function CalendarMeteo() {
       "00h"
   ];
 
-  let selectHour = null
 
-  selectDay == null ? console.log(listeJour, listeJour[ new Date().getDay() ]) : '';
-  selectDay == null ? setSelectDay(listeJour[ new Date().getDay() ]) : '';
 
     useEffect(() => {
         
@@ -81,77 +75,46 @@ export default function CalendarMeteo() {
         location && getCalendar(location.coords.latitude,location.coords.longitude);
     }, []);
 
-    useEffect(() => {
-      setSelectHour(selectHour);
-      console.log(selectHour2)
-  }, [selectHour]);
+    
 
 
   return (
     <View style={styles.container}>
       { calendarData != null ? 
       <View>
-        {/* Etape :
-            -faire un select avec les jours de la semaine en sélectionnant le jour actuel
-            -afficher l'icon de la journée select
-            -faire un select avec les heures dispo du jour en sélectionnant la première heure dispo de ce jour
-        */}
+        <Text style={styles.titre}>Prévision de la semaine</Text>
         
-        <ScrollView style={styles.scrollView}>
-            
-          {/* <SelectDropdown
-            data={listeJour}
-            // defaultValueByIndex={1} // use default value by index or default value
-            // defaultValue={'Canada'} // use default value by index or default value
-            onSelect={(selectedItem, index) => {
-              console.log(selectedItem, index, calendarDataSelect);
-            }}
-            defaultValue={listeJour[ (new Date().getDay())-1 ]}
-            defaultButtonText={'Sélectionner  un jour'}
-            // buttonTextAfterSelection={(selectedItem, index) => {
-            //   return selectedItem;
-            // }}
-            // rowTextForSelection={(item, index) => {
-            //   return item;
-            // }}
-          /> */}
+        <View style={styles.select}>
+          <SelectDropdown
+            data={listeHour}
 
+            onSelect={(selectedItem, index) => {
+              setSelectHour(selectedItem)
+              // console.log(selectedItem);
+            }}
+            buttonStyle={styles.dropdownButton}
+
+            defaultValue={selectHour}
+
+            defaultButtonText={'Sélectionner  une heure'}
+          /> 
+        </View>
+        <ScrollView horizontal={true} style={styles.scrollView}>           
             {
-            calendarData.list.map((item, index) => {              
-              
+            calendarData.list.map((item, index) => {
+                
                 const date = new Date(item.dt_txt);
 
                 let day = listeJour[date.getDay()];
 
-                let hour = date.getHours();
+                let hour = date.getHours()+'h';
+                console.log((index ) % 8, listeHour.indexOf(selectHour))
 
-                let view = 0;
-
-                // let selectHour = null
-                // selectHour == null ? setSelectHour(hour+'h') : '';
-
-                selectHour == null ? selectHour = hour+'h' : '';
-
-                console.log(hour+'h', selectHour2,selectHour, day, selectDay , date.getDay());
-
-                if(( hour+'h' == selectHour2 || hour+'h' == selectHour) && day == selectDay){
+                if((listeHour.indexOf(selectHour)+1) == (index + 1) % 8){
                   return (
-                    
-                    <View key={index}>
-                      <SelectDropdown
-                        data={listeJour}
-                        // defaultValueByIndex={1} // use default value by index or default value
-                        // defaultValue={'Canada'} // use default value by index or default value
-                        onSelect={(selectedItem, index) => {
-                          setSelectDay(selectedItem);
-                          // setSelectHour(hour+'h');
-                          // getCalendar(location.coords.latitude,location.coords.longitude);
-                          console.log(listeJour, selectedItem);
-                        }}
-                        defaultValue={day}
-                        defaultButtonText={'Sélectionner  un jour'}
-                      /> 
-                      <Text>{ item.main.temp } °C</Text>
+                  <View key={index} style={styles.semaineMeteo}>
+                      <Text style={styles.textSemaineMeteo}>{day}</Text>
+                      <Text style={styles.tempSemaineMeteo}>{Math.floor(item.main.temp)} °C</Text>
                       <Image
                           resizeMode="cover"
                           style={styles.image}
@@ -160,51 +123,12 @@ export default function CalendarMeteo() {
                           }}
                               
                       />
-                      <Text>{ item.weather[0].description }</Text>
-                      <SelectDropdown
-                        data={listeHour}
-
-                        onSelect={(selectedItem, index) => {
-                          selectHour = selectedItem;
-                          console.log(selectedItem, selectHour);
-                        }}
-
-                        defaultValue={hour+'h'}
-
-                        defaultButtonText={'Sélectionner  un jour'}
-                      /> 
+                      <Text style={styles.descriptionSemaineMeteo}>{item.weather[0].description}</Text>
                   </View>
-                  
                   );
                 }
             })
             }
-
-            {/* {
-            calendarData.list.map((item, index) => {
-                
-                const date = new Date(item.dt_txt);
-
-                let day = listeJour[date.getDay()];
-
-                let hour = date.getHours();
-
-                return (
-                <View key={index}>
-                    <Text >{day}</Text>
-                    <Text >{hour} H</Text>
-                    <Image
-                        resizeMode="cover"
-                        style={styles.image}
-                        source={{
-                        uri: 'https://openweathermap.org/img/wn/'+ item.weather[0].icon +'@2x.png',
-                        }}
-                            
-                    />
-                </View>
-                );
-            })
-            } */}
         </ScrollView>
       </View>
       : ""}
@@ -216,22 +140,64 @@ export default function CalendarMeteo() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  scrollView: {
-    // alignItems: 'center',
-    // justifyContent: 'center',
+    backgroundColor: '#70aadb',
   },
   text: {
     textAlign: 'center',
   },
   image: {
-    width: 50,
-    height: 50,
-    // marginVertical: 5,
-    // borderRadius: 5,
+    width: 100,
+    height: 100,
+  },
+  titre: {
+    fontSize: 20, 
+    color: '#333',
+    textAlign: 'center', 
+    textTransform: 'uppercase',
+    paddingTop: 50,
+  },
+  sousTitre: {
+    fontSize: 15, 
+    color: '#333',
+    textAlign: 'center', 
+    paddingTop: 10,
+    paddingBottom: 50
+  },
+  semaineMeteo: {
+    backgroundColor: '#7d9db8',
+    borderRadius: 8,
+    marginBottom: 100,
+    paddingHorizontal: 30,
+    marginRight: 10,
+    marginLeft: 10
+  },
+  textSemaineMeteo: {
+    fontSize: 15,
+    fontWeight: 'bold', 
+    marginTop: 30,
+    textAlign: 'center',
+  },
+  tempSemaineMeteo: {
+    fontSize: 10,
+    marginTop: 5,
+    textAlign: 'center',
+  },
+  descriptionSemaineMeteo: {
+    fontSize: 15,
+    textAlign: 'center',
+  },
+  select: {
+    marginTop: 10,
+    marginBottom: 10,
+    alignItems: 'center',
+    textAlign: 'center',
+  },
+  dropdownButton: {
+    width: 100,
+    height: 40,
+    backgroundColor: '#e0e0e0',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
   },
 });

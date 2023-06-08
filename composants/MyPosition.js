@@ -80,7 +80,7 @@ export default function MyPosition() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e7e9eb',
+    backgroundColor: '#dcf2fd',
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     boxShadow: '0 4px 8px 0 rgba(0,0,0,0.2)',
     transition: '0.3s',
     borderRadius: '5px',
-    backgroundColor: '#e7e9eb',
+    // backgroundColor: '#e7e9eb',
     alignItems: 'center',
     justifyContent: 'center',
   },
